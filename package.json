@@ -1,0 +1,25 @@
+{
+  "name": "library-manager-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "start": "node dist/index.js",
+    "server:dev": "npm run start --prefix server",
+    "client:dev": "npm run dev --prefix client",
+    "both:dev": "concurrently \"npm run client:dev\" \"npm run server:dev\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@types/node": "^24.0.13",
+    "concurrently": "^9.2.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}
