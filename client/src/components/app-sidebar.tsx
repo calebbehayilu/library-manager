@@ -1,5 +1,4 @@
 import * as React from "react";
-import { IconBook } from "@tabler/icons-react";
 
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
@@ -21,6 +20,7 @@ import {
   UserCog,
   Users,
 } from "lucide-react";
+import { Link } from "react-router";
 
 const data = {
   user: {
@@ -77,10 +77,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <a href="/">
+              <Link to="/">
                 <BookOpen className="!size-5" />
                 <span className="text-base font-semibold">Library.</span>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

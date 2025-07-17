@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/sidebar";
 import type { ComponentType } from "react";
 import type { LucideProps } from "lucide-react";
+import { Link } from "react-router";
 
 export function NavMain({
   items,
@@ -45,12 +46,12 @@ export function NavMain({
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <a href={item.url} className="flex items-center gap-2">
+              <Link to={item.url} className="flex items-center gap-2">
                 <SidebarMenuButton tooltip={item.title}>
                   <item.icon />
                   <span>{item.title}</span>
                 </SidebarMenuButton>
-              </a>
+              </Link>
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
