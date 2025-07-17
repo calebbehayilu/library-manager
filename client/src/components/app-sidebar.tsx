@@ -15,8 +15,8 @@ import {
 import {
   ArrowLeftRight,
   BookOpen,
-  ChartColumnDecreasing,
   LayoutDashboard,
+  Settings,
   Tag,
   UserCog,
   Users,
@@ -24,45 +24,45 @@ import {
 
 const data = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    name: "Library Admin",
+    email: "admin@library.com",
+    avatar: "/avatars/admin.jpg",
   },
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "/",
       icon: LayoutDashboard,
     },
     {
       title: "Books",
-      url: "#",
-      icon: IconBook,
-    },
-    {
-      title: "Borrow/Return",
-      url: "#",
-      icon: ArrowLeftRight,
+      url: "/books",
+      icon: BookOpen,
     },
     {
       title: "Members",
-      url: "#",
+      url: "/members",
       icon: Users,
     },
     {
+      title: "Borrowings",
+      url: "/borrowings",
+      icon: ArrowLeftRight,
+    },
+    {
+      title: "Genres",
+      url: "/genres",
+      icon: Tag,
+    },
+    {
       title: "Staff",
-      url: "#",
+      url: "/staff",
       icon: UserCog,
     },
     {
-      title: "Staff",
-      url: "#",
-      icon: ChartColumnDecreasing,
-    },
-    {
-      title: "Geners",
-      url: "#",
-      icon: Tag,
+      title: "Settings",
+      url: "/settings",
+      icon: Settings,
     },
   ],
 };
@@ -77,7 +77,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <a href="#">
+              <a href="/">
                 <BookOpen className="!size-5" />
                 <span className="text-base font-semibold">Library.</span>
               </a>
