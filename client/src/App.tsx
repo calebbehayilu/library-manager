@@ -1,12 +1,26 @@
-import { Button } from "./components/ui/button";
+import { BrowserRouter as Router, Routes, Route } from "react-router";
+import { LoginPage } from "./pages/login";
+import { AuthProvider } from "./auth/auth-context";
+import { ProtectedRoute } from "./auth/protected-route";
+import { Layout } from "./components/layout";
 
 function App() {
   return (
-    <>
-      <div className="flex flex-col items-center justify-center">
-        <Button>Click me</Button>
-      </div>
-    </>
+    <Router>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route
+            path="/*"
+            element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </AuthProvider>
+    </Router>
   );
 }
 

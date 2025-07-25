@@ -1,96 +1,81 @@
-import * as React from "react";
-
-import { NavMain } from "@/components/nav-main";
-import { NavUser } from "@/components/nav-user";
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "@/components/ui/sidebar";
-import {
-  ArrowLeftRight,
-  BookOpen,
-  LayoutDashboard,
-  Settings,
-  Tag,
-  UserCog,
+  Home,
+  Book,
   Users,
+  Repeat,
+  List,
+  UserCog,
+  Settings,
 } from "lucide-react";
 import { Link } from "react-router";
 
-const data = {
-  user: {
-    name: "Library Admin",
-    email: "admin@library.com",
-    avatar: "/avatars/admin.jpg",
-  },
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "/",
-      icon: LayoutDashboard,
-    },
-    {
-      title: "Books",
-      url: "/books",
-      icon: BookOpen,
-    },
-    {
-      title: "Members",
-      url: "/members",
-      icon: Users,
-    },
-    {
-      title: "Borrowings",
-      url: "/borrowings",
-      icon: ArrowLeftRight,
-    },
-    {
-      title: "Genres",
-      url: "/genres",
-      icon: Tag,
-    },
-    {
-      title: "Staff",
-      url: "/staff",
-      icon: UserCog,
-    },
-    {
-      title: "Settings",
-      url: "/settings",
-      icon: Settings,
-    },
-  ],
-};
-
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar() {
   return (
-    <Sidebar collapsible="offcanvas" {...props}>
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5"
+    <div className="hidden border-r bg-muted/40 md:block">
+      <div className="flex h-full max-h-screen flex-col gap-2">
+        <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
+          <Link
+            to="/dashboard"
+            className="flex items-center gap-2 font-semibold"
+          >
+            <Book className="h-6 w-6" />
+            <span className="">Library Manager</span>
+          </Link>
+        </div>
+        <div className="flex-1">
+          <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+            <Link
+              to="/dashboard"
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
             >
-              <Link to="/">
-                <BookOpen className="!size-5" />
-                <span className="text-base font-semibold">Library.</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-      <SidebarContent>
-        <NavMain items={data.navMain} />
-      </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={data.user} />
-      </SidebarFooter>
-    </Sidebar>
+              <Home className="h-4 w-4" />
+              Dashboard
+            </Link>
+            <Link
+              to="/books"
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+            >
+              <Book className="h-4 w-4" />
+              Books
+            </Link>
+            <Link
+              to="/members"
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+            >
+              <Users className="h-4 w-4" />
+              Members
+            </Link>
+            <Link
+              to="/borrowings"
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+            >
+              <Repeat className="h-4 w-4" />
+              Borrowings
+            </Link>
+            <Link
+              to="/genres"
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+            >
+              <List className="h-4 w-4" />
+              Genres
+            </Link>
+            <Link
+              to="/staff"
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+            >
+              <UserCog className="h-4 w-4" />
+              Staff
+            </Link>
+            <Link
+              to="/settings"
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+            >
+              <Settings className="h-4 w-4" />
+              Settings
+            </Link>
+          </nav>
+        </div>
+      </div>
+    </div>
   );
 }

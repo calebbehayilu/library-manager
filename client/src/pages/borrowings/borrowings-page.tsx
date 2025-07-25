@@ -1,281 +1,239 @@
-import { useState } from "react";
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeftRight, Plus, Search, Eye, RefreshCw, AlertCircle } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Search, Loader2, Calendar, User, Book, RotateCcw } from "lucide-react";
+import { apiService } from '@/services/api';
 
 interface Borrowing {
   id: string;
-  memberName: string;
-  memberEmail: string;
-  memberAvatar?: string;
-  bookTitle: string;
-  bookAuthor: string;
-  issueDate: string;
+  member: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    membershipNumber: string;
+  };
+  book: {
+    id: string;
+    title: string;
+    author: string;
+    isbn: string;
+  };
+  borrowDate: string;
   dueDate: string;
   returnDate?: string;
-  status: "issued" | "overdue" | "returned";
-  renewalCount: number;
-  maxRenewals: number;
+  isReturned: boolean;
 }
 
-const mockBorrowings: Borrowing[] = [
-  {
-    id: "1",
-    memberName: "John Doe",
-    memberEmail: "john.doe@email.com",
-    memberAvatar: "/api/placeholder/40/40",
-    bookTitle: "To Kill a Mockingbird",
-    bookAuthor: "Harper Lee",
-    issueDate: "2024-07-01",
-    dueDate: "2024-07-15",
-    status: "issued",
-    renewalCount: 0,
-    maxRenewals: 2
-  },
-  {
-    id: "2",
-    memberName: "Jane Smith",
-    memberEmail: "jane.smith@email.com",
-    memberAvatar: "/api/placeholder/40/40",
-    bookTitle: "1984",
-    bookAuthor: "George Orwell",
-    issueDate: "2024-06-20",
-    dueDate: "2024-07-04",
-    status: "overdue",
-    renewalCount: 1,
-    maxRenewals: 2
-  },
-  {
-    id: "3",
-    memberName: "Bob Johnson",
-    memberEmail: "bob.johnson@email.com",
-    memberAvatar: "/api/placeholder/40/40",
-    bookTitle: "Pride and Prejudice",
-    bookAuthor: "Jane Austen",
-    issueDate: "2024-06-15",
-    dueDate: "2024-06-29",
-    returnDate: "2024-06-28",
-    status: "returned",
-    renewalCount: 0,
-    maxRenewals: 2
-  },
-];
+export function BorrowingsPage() {
+  const [borrowings, setBorrowings] = useState<Borrowing[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedTab, setSelectedTab] = useState('active');
 
-export default function BorrowingsPage() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [borrowings] = useState<Borrowing[]>(mockBorrowings);
+  useEffect(() => {
+    loadBorrowings();
+  }, []);
 
-  const filteredBorrowings = borrowings.filter(borrowing =>
-    borrowing.memberName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    borrowing.bookTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    borrowing.bookAuthor.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const getStatusColor = (status: Borrowing['status']) => {
-    switch (status) {
-      case "issued":
-        return "bg-blue-100 text-blue-800";
-      case "overdue":
-        return "bg-red-100 text-red-800";
-      case "returned":
-        return "bg-green-100 text-green-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+  const loadBorrowings = async () => {
+    try {
+      setLoading(true);
+      const borrowingsData = await apiService.getBorrowings();
+      setBorrowings(borrowingsData);
+    } catch (error) {
+      console.error('Failed to load borrowings:', error);
+      // Set mock data for testing
+      setBorrowings([
+        {
+          id: '1',
+          member: {
+            id: '1',
+            firstName: 'John',
+            lastName: 'Doe',
+            membershipNumber: 'LIB001'
+          },
+          book: {
+            id: '1',
+            title: 'The Great Gatsby',
+            author: 'F. Scott Fitzgerald',
+            isbn: '978-0-7432-7356-5'
+          },
+          borrowDate: '2024-01-15',
+          dueDate: '2024-01-29',
+          isReturned: false
+        },
+        {
+          id: '2',
+          member: {
+            id: '2',
+            firstName: 'Jane',
+            lastName: 'Smith',
+            membershipNumber: 'LIB002'
+          },
+          book: {
+            id: '2',
+            title: 'To Kill a Mockingbird',
+            author: 'Harper Lee',
+            isbn: '978-0-06-112008-4'
+          },
+          borrowDate: '2024-01-10',
+          dueDate: '2024-01-24',
+          returnDate: '2024-01-22',
+          isReturned: true
+        }
+      ]);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const getDaysUntilDue = (dueDate: string) => {
-    const due = new Date(dueDate);
-    const today = new Date();
-    const diffTime = due.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
+  const handleReturn = async (id: string) => {
+    try {
+      // In a real implementation, this would call the API
+      // await apiService.returnBook(id);
+      setBorrowings(prev => prev.map(borrowing => 
+        borrowing.id === id 
+          ? { ...borrowing, isReturned: true, returnDate: new Date().toISOString().split('T')[0] }
+          : borrowing
+      ));
+    } catch (error) {
+      console.error('Failed to return book:', error);
+    }
   };
 
-  const getOverdueDays = (dueDate: string) => {
-    const due = new Date(dueDate);
-    const today = new Date();
-    const diffTime = today.getTime() - due.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
+  const filteredBorrowings = borrowings.filter(borrowing => {
+    const matchesSearch = 
+      borrowing.member.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      borrowing.member.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      borrowing.book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      borrowing.member.membershipNumber.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    if (selectedTab === 'active') {
+      return matchesSearch && !borrowing.isReturned;
+    } else if (selectedTab === 'returned') {
+      return matchesSearch && borrowing.isReturned;
+    } else if (selectedTab === 'overdue') {
+      return matchesSearch && !borrowing.isReturned && new Date(borrowing.dueDate) < new Date();
+    }
+    return matchesSearch;
+  });
+
+  const isOverdue = (dueDate: string, isReturned: boolean) => {
+    return !isReturned && new Date(dueDate) < new Date();
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <ArrowLeftRight className="h-8 w-8 text-blue-600" />
-          <h1 className="text-3xl font-bold">Borrowings Management</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Borrowings</h1>
+      </div>
+
+      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="active">Active Borrowings</TabsTrigger>
+          <TabsTrigger value="returned">Returned</TabsTrigger>
+          <TabsTrigger value="overdue">Overdue</TabsTrigger>
+          <TabsTrigger value="all">All</TabsTrigger>
+        </TabsList>
+
+        <div className="flex items-center space-x-2">
+          <Search className="h-4 w-4 text-gray-400" />
+          <Input
+            placeholder="Search borrowings..."
+            className="max-w-sm"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
-        <Button className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          Issue New Book
-        </Button>
-      </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-              <span className="text-sm font-medium">Currently Issued</span>
+        <TabsContent value={selectedTab} className="space-y-4">
+          {filteredBorrowings.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500">No borrowings found.</p>
             </div>
-            <div className="text-2xl font-bold mt-2">
-              {borrowings.filter(b => b.status === "issued").length}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-              <span className="text-sm font-medium">Overdue</span>
-            </div>
-            <div className="text-2xl font-bold mt-2">
-              {borrowings.filter(b => b.status === "overdue").length}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-              <span className="text-sm font-medium">Returned</span>
-            </div>
-            <div className="text-2xl font-bold mt-2">
-              {borrowings.filter(b => b.status === "returned").length}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Search */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Search Borrowings</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Search by member name, book title, or author..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Borrowings Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Book Borrowings ({filteredBorrowings.length})</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Member</TableHead>
-                  <TableHead>Book</TableHead>
-                  <TableHead>Issue Date</TableHead>
-                  <TableHead>Due Date</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Renewals</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredBorrowings.map((borrowing) => (
-                  <TableRow key={borrowing.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage src={borrowing.memberAvatar} alt={borrowing.memberName} />
-                          <AvatarFallback>
-                            {borrowing.memberName.split(' ').map(n => n[0]).join('')}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="font-medium">{borrowing.memberName}</div>
-                          <div className="text-sm text-gray-500">{borrowing.memberEmail}</div>
+          ) : (
+            <div className="grid gap-4">
+              {filteredBorrowings.map((borrowing) => (
+                <Card key={borrowing.id}>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <Book className="h-5 w-5" />
+                        <span>{borrowing.book.title}</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        {isOverdue(borrowing.dueDate, borrowing.isReturned) && (
+                          <Badge variant="destructive">Overdue</Badge>
+                        )}
+                        <Badge variant={borrowing.isReturned ? "secondary" : "default"}>
+                          {borrowing.isReturned ? "Returned" : "Active"}
+                        </Badge>
+                      </div>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <User className="h-4 w-4 text-gray-400" />
+                          <span className="text-sm">
+                            {borrowing.member.firstName} {borrowing.member.lastName}
+                          </span>
                         </div>
+                        <p className="text-sm text-gray-600">
+                          Member #: {borrowing.member.membershipNumber}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          By {borrowing.book.author}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          ISBN: {borrowing.book.isbn}
+                        </p>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{borrowing.bookTitle}</div>
-                        <div className="text-sm text-gray-500">by {borrowing.bookAuthor}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {new Date(borrowing.issueDate).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      <div className="space-y-1">
-                        <div>{new Date(borrowing.dueDate).toLocaleDateString()}</div>
-                        {borrowing.status === "issued" && (
-                          <div className="text-sm">
-                            {getDaysUntilDue(borrowing.dueDate) > 0 ? (
-                              <span className="text-gray-500">
-                                {getDaysUntilDue(borrowing.dueDate)} days left
-                              </span>
-                            ) : (
-                              <span className="text-red-500 flex items-center gap-1">
-                                <AlertCircle className="h-3 w-3" />
-                                Due today
-                              </span>
-                            )}
-                          </div>
-                        )}
-                        {borrowing.status === "overdue" && (
-                          <div className="text-sm text-red-500 flex items-center gap-1">
-                            <AlertCircle className="h-3 w-3" />
-                            {getOverdueDays(borrowing.dueDate)} days overdue
-                          </div>
-                        )}
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <Calendar className="h-4 w-4 text-gray-400" />
+                          <span className="text-sm">
+                            Borrowed: {new Date(borrowing.borrowDate).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600">
+                          Due: {new Date(borrowing.dueDate).toLocaleDateString()}
+                        </p>
                         {borrowing.returnDate && (
-                          <div className="text-sm text-gray-500">
+                          <p className="text-sm text-gray-600">
                             Returned: {new Date(borrowing.returnDate).toLocaleDateString()}
-                          </div>
+                          </p>
                         )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={getStatusColor(borrowing.status)}>
-                        {borrowing.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm">
-                        {borrowing.renewalCount}/{borrowing.maxRenewals}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        {borrowing.status === "issued" && (
-                          <Button variant="outline" size="sm">
-                            <RefreshCw className="h-4 w-4" />
+                        {!borrowing.isReturned && (
+                          <Button 
+                            size="sm" 
+                            onClick={() => handleReturn(borrowing.id)}
+                            className="mt-2"
+                          >
+                            <RotateCcw className="h-4 w-4 mr-2" />
+                            Mark as Returned
                           </Button>
                         )}
                       </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

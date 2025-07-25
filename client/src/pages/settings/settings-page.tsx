@@ -1,264 +1,264 @@
-import { useState } from "react";
+import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Settings, Save, Bell, Shield, Database, Users, Calendar } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { useAuth } from '@/auth/auth-context';
+import { User, Bell, Shield, Database, Palette } from "lucide-react";
 
-export default function SettingsPage() {
-  const [notifications, setNotifications] = useState(true);
-  const [autoBackup, setAutoBackup] = useState(true);
-  const [memberRegistration, setMemberRegistration] = useState(false);
+export function SettingsPage() {
+  const { logout } = useAuth();
+  const [notifications, setNotifications] = useState({
+    emailNotifications: true,
+    pushNotifications: false,
+    overdueReminders: true,
+    newMemberAlerts: true
+  });
+  
+  const [appearance, setAppearance] = useState({
+    darkMode: false,
+    compactView: false,
+    showSidebar: true
+  });
+
+  const [library, setLibrary] = useState({
+    maxBorrowDays: '14',
+    maxBooksPerMember: '5',
+    finePerDay: '0.50'
+  });
+
+  const handleLogout = () => {
+    logout();
+  };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Settings className="h-8 w-8 text-blue-600" />
-          <h1 className="text-3xl font-bold">Settings</h1>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+          <p className="text-muted-foreground">
+            Manage your application preferences and system configuration
+          </p>
         </div>
-        <Button className="flex items-center gap-2">
-          <Save className="h-4 w-4" />
-          Save Changes
-        </Button>
       </div>
 
-      <Tabs defaultValue="general" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
-          <TabsTrigger value="backup">Backup</TabsTrigger>
+      <Tabs defaultValue="account" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="account" className="flex items-center space-x-2">
+            <User className="h-4 w-4" />
+            <span>Account</span>
+          </TabsTrigger>
+          <TabsTrigger value="notifications" className="flex items-center space-x-2">
+            <Bell className="h-4 w-4" />
+            <span>Notifications</span>
+          </TabsTrigger>
+          <TabsTrigger value="appearance" className="flex items-center space-x-2">
+            <Palette className="h-4 w-4" />
+            <span>Appearance</span>
+          </TabsTrigger>
+          <TabsTrigger value="library" className="flex items-center space-x-2">
+            <Database className="h-4 w-4" />
+            <span>Library</span>
+          </TabsTrigger>
+          <TabsTrigger value="security" className="flex items-center space-x-2">
+            <Shield className="h-4 w-4" />
+            <span>Security</span>
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="general" className="space-y-6">
+        <TabsContent value="account" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                Library Information
-              </CardTitle>
+              <CardTitle>Account Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="library-name">Library Name</Label>
-                  <Input id="library-name" placeholder="Central Library" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="library-code">Library Code</Label>
-                  <Input id="library-code" placeholder="LIB001" />
+              <div className="grid gap-2">
+                <Label>Current User</Label>
+                <div className="flex items-center space-x-2">
+                  <Badge variant="secondary">Logged In</Badge>
+                  <span className="text-sm text-gray-600">Admin User</span>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="library-address">Address</Label>
-                <Input id="library-address" placeholder="123 Main Street, City, State" />
+              <div className="grid gap-2">
+                <Label htmlFor="password">Change Password</Label>
+                <Input id="password" type="password" placeholder="New password" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="library-phone">Phone</Label>
-                  <Input id="library-phone" placeholder="+1 (555) 123-4567" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="library-email">Email</Label>
-                  <Input id="library-email" placeholder="info@library.com" />
-                </div>
+              <div className="grid gap-2">
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Input id="confirmPassword" type="password" placeholder="Confirm new password" />
               </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                Loan Settings
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="loan-period">Default Loan Period (days)</Label>
-                  <Input id="loan-period" type="number" placeholder="14" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="max-renewals">Maximum Renewals</Label>
-                  <Input id="max-renewals" type="number" placeholder="2" />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="max-books-student">Max Books (Students)</Label>
-                  <Input id="max-books-student" type="number" placeholder="5" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="max-books-faculty">Max Books (Faculty)</Label>
-                  <Input id="max-books-faculty" type="number" placeholder="10" />
-                </div>
+              <div className="flex space-x-2">
+                <Button>Update Password</Button>
+                <Button variant="destructive" onClick={handleLogout}>
+                  Logout
+                </Button>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="notifications" className="space-y-6">
+        <TabsContent value="notifications" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Bell className="h-5 w-5" />
-                Notification Settings
-              </CardTitle>
+              <CardTitle>Notification Preferences</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium">Email Notifications</h3>
+                <div className="space-y-0.5">
+                  <Label>Email Notifications</Label>
                   <p className="text-sm text-gray-600">Receive notifications via email</p>
                 </div>
-                <Switch checked={notifications} onCheckedChange={setNotifications} />
+                <Switch 
+                  checked={notifications.emailNotifications} 
+                  onCheckedChange={(checked) => setNotifications(prev => ({...prev, emailNotifications: checked}))}
+                />
               </div>
               <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium">Overdue Reminders</h3>
-                  <p className="text-sm text-gray-600">Send reminders for overdue books</p>
+                <div className="space-y-0.5">
+                  <Label>Push Notifications</Label>
+                  <p className="text-sm text-gray-600">Receive browser push notifications</p>
                 </div>
-                <Switch defaultChecked />
+                <Switch 
+                  checked={notifications.pushNotifications} 
+                  onCheckedChange={(checked) => setNotifications(prev => ({...prev, pushNotifications: checked}))}
+                />
               </div>
               <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium">New Member Alerts</h3>
-                  <p className="text-sm text-gray-600">Notify when new members register</p>
+                <div className="space-y-0.5">
+                  <Label>Overdue Reminders</Label>
+                  <p className="text-sm text-gray-600">Get notified about overdue books</p>
                 </div>
-                <Switch defaultChecked />
+                <Switch 
+                  checked={notifications.overdueReminders} 
+                  onCheckedChange={(checked) => setNotifications(prev => ({...prev, overdueReminders: checked}))}
+                />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="reminder-days">Days Before Due Date to Send Reminder</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select days" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">1 day</SelectItem>
-                    <SelectItem value="2">2 days</SelectItem>
-                    <SelectItem value="3">3 days</SelectItem>
-                    <SelectItem value="7">7 days</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>New Member Alerts</Label>
+                  <p className="text-sm text-gray-600">Get notified when new members register</p>
+                </div>
+                <Switch 
+                  checked={notifications.newMemberAlerts} 
+                  onCheckedChange={(checked) => setNotifications(prev => ({...prev, newMemberAlerts: checked}))}
+                />
               </div>
+              <Button>Save Notification Settings</Button>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="security" className="space-y-6">
+        <TabsContent value="appearance" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5" />
-                Security Settings
-              </CardTitle>
+              <CardTitle>Appearance Settings</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium">Two-Factor Authentication</h3>
-                  <p className="text-sm text-gray-600">Add an extra layer of security</p>
+                <div className="space-y-0.5">
+                  <Label>Dark Mode</Label>
+                  <p className="text-sm text-gray-600">Switch to dark theme</p>
                 </div>
-                <Switch />
+                <Switch 
+                  checked={appearance.darkMode} 
+                  onCheckedChange={(checked) => setAppearance(prev => ({...prev, darkMode: checked}))}
+                />
               </div>
               <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium">Auto-Lock Sessions</h3>
-                  <p className="text-sm text-gray-600">Automatically lock inactive sessions</p>
+                <div className="space-y-0.5">
+                  <Label>Compact View</Label>
+                  <p className="text-sm text-gray-600">Use a more compact layout</p>
                 </div>
-                <Switch defaultChecked />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="session-timeout">Session Timeout (minutes)</Label>
-                <Input id="session-timeout" type="number" placeholder="30" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password-policy">Password Policy</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select policy" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="weak">Weak (6+ characters)</SelectItem>
-                    <SelectItem value="medium">Medium (8+ characters, mixed case)</SelectItem>
-                    <SelectItem value="strong">Strong (12+ characters, mixed case, numbers, symbols)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                Member Registration
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium">Allow Self-Registration</h3>
-                  <p className="text-sm text-gray-600">Let users register themselves</p>
-                </div>
-                <Switch checked={memberRegistration} onCheckedChange={setMemberRegistration} />
+                <Switch 
+                  checked={appearance.compactView} 
+                  onCheckedChange={(checked) => setAppearance(prev => ({...prev, compactView: checked}))}
+                />
               </div>
               <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium">Require Admin Approval</h3>
-                  <p className="text-sm text-gray-600">New registrations need approval</p>
+                <div className="space-y-0.5">
+                  <Label>Show Sidebar</Label>
+                  <p className="text-sm text-gray-600">Display the navigation sidebar</p>
                 </div>
-                <Switch defaultChecked />
+                <Switch 
+                  checked={appearance.showSidebar} 
+                  onCheckedChange={(checked) => setAppearance(prev => ({...prev, showSidebar: checked}))}
+                />
               </div>
+              <Button>Save Appearance Settings</Button>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="backup" className="space-y-6">
+        <TabsContent value="library" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Database className="h-5 w-5" />
-                Backup Settings
-              </CardTitle>
+              <CardTitle>Library Configuration</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium">Automatic Backups</h3>
-                  <p className="text-sm text-gray-600">Enable scheduled backups</p>
+              <div className="grid gap-2">
+                <Label htmlFor="maxBorrowDays">Maximum Borrow Days</Label>
+                <Input 
+                  id="maxBorrowDays" 
+                  type="number" 
+                  value={library.maxBorrowDays}
+                  onChange={(e) => setLibrary(prev => ({...prev, maxBorrowDays: e.target.value}))}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="maxBooksPerMember">Maximum Books per Member</Label>
+                <Input 
+                  id="maxBooksPerMember" 
+                  type="number" 
+                  value={library.maxBooksPerMember}
+                  onChange={(e) => setLibrary(prev => ({...prev, maxBooksPerMember: e.target.value}))}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="finePerDay">Fine per Day ($)</Label>
+                <Input 
+                  id="finePerDay" 
+                  type="number" 
+                  step="0.01"
+                  value={library.finePerDay}
+                  onChange={(e) => setLibrary(prev => ({...prev, finePerDay: e.target.value}))}
+                />
+              </div>
+              <Button>Save Library Settings</Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="security" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Security Settings</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-4">
+                <div className="p-4 border rounded-lg">
+                  <h3 className="font-medium mb-2">Session Management</h3>
+                  <p className="text-sm text-gray-600 mb-3">
+                    Manage your active sessions and logout from all devices
+                  </p>
+                  <Button variant="outline">View Active Sessions</Button>
                 </div>
-                <Switch checked={autoBackup} onCheckedChange={setAutoBackup} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="backup-frequency">Backup Frequency</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select frequency" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="daily">Daily</SelectItem>
-                    <SelectItem value="weekly">Weekly</SelectItem>
-                    <SelectItem value="monthly">Monthly</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="backup-retention">Backup Retention (days)</Label>
-                <Input id="backup-retention" type="number" placeholder="30" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="backup-location">Backup Location</Label>
-                <Input id="backup-location" placeholder="/backups/library" />
-              </div>
-              <div className="flex gap-2">
-                <Button>Create Backup Now</Button>
-                <Button variant="outline">Restore from Backup</Button>
+                <div className="p-4 border rounded-lg">
+                  <h3 className="font-medium mb-2">Database Backup</h3>
+                  <p className="text-sm text-gray-600 mb-3">
+                    Create a backup of your library database
+                  </p>
+                  <Button variant="outline">Create Backup</Button>
+                </div>
+                <div className="p-4 border rounded-lg">
+                  <h3 className="font-medium mb-2">System Logs</h3>
+                  <p className="text-sm text-gray-600 mb-3">
+                    View system activity and error logs
+                  </p>
+                  <Button variant="outline">View Logs</Button>
+                </div>
               </div>
             </CardContent>
           </Card>

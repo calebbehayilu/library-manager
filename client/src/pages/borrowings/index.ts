@@ -1,1 +1,1 @@
-export { default } from './borrowings-page';
+export * from './borrowings-page';
