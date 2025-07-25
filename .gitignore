@@ -121,3 +121,6 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # Local development files
 *.local
+
+# IDE and development tools
+.kiro/
