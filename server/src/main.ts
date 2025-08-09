@@ -8,6 +8,14 @@ async function bootstrap() {
   app.enableCors({
     origin: process.env.CORS_URL, // Vite dev server default
     credentials: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: [
+      'Origin',
+      'X-Requested-With',
+      'Content-Type',
+      'Accept',
+      'Authorization',
+    ],
   });
   // Set global prefix for API routes
   app.setGlobalPrefix('api');
